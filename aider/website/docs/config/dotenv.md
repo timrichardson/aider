@@ -32,7 +32,7 @@ can also
 from aider.args import get_sample_dotenv
 from pathlib import Path
 text=get_sample_dotenv()
-Path("aider/training_data/assets/sample.env").write_text(text)
+Path("aider/training_data_aider/assets/sample.env").write_text(text)
 cog.outl("```")
 cog.out(text)
 cog.outl("```")

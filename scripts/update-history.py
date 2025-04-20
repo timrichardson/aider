@@ -28,7 +28,7 @@ def run_git_log():
         f"v{latest_ver}..HEAD",
         "--",
         "aider/",
-        ":!aider/training_data/",
+        ":!aider/training_data_aider/",
         ":!scripts/",
         ":!HISTORY.md",
     ]
@@ -44,7 +44,7 @@ def run_git_diff():
         f"v{latest_ver}..HEAD",
         "--",
         "aider/",
-        ":!aider/training_data/",
+        ":!aider/training_data_aider/",
         ":!scripts/",
         ":!HISTORY.md",
     ]
@@ -60,7 +60,7 @@ def run_plain_git_log():
         f"v{latest_ver}..HEAD",
         "--",
         "aider/",
-        ":!aider/training_data/",
+        ":!aider/training_data_aider/",
         ":!scripts/",
         ":!HISTORY.md",
     ]

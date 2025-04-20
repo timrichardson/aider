@@ -31,7 +31,7 @@ def install_help_extra(io):
 
 
 def get_package_files():
-    for path in importlib_resources.files("aider.training_data").iterdir():
+    for path in importlib_resources.files("aider.training_data_aider").iterdir():
         if path.is_file():
             yield path
         elif path.is_dir():
@@ -40,7 +40,7 @@ def get_package_files():
 
 
 def fname_to_url(filepath):
-    website = "training_data"
+    website = "training_data_aider"
     index = "index.md"
     md = ".md"
 
@@ -53,13 +53,13 @@ def fname_to_url(filepath):
     # Split the path into parts
     parts = path.parts
 
-    # Find the 'training_data' part in the path
+    # Find the 'training_data_aider' part in the path
     try:
         website_index = [p.lower() for p in parts].index(website.lower())
     except ValueError:
-        return ""  # 'training_data' not found in the path
+        return ""  # 'training_data_aider' not found in the path
 
-    # Extract the part of the path starting from 'training_data'
+    # Extract the part of the path starting from 'training_data_aider'
     relevant_parts = parts[website_index + 1 :]
 
     # Handle _includes directory
@@ -112,7 +112,7 @@ def get_index():
                 continue
 
             doc = Document(
-                text=importlib_resources.files("aider.training_data")
+                text=importlib_resources.files("aider.training_data_aider")
                 .joinpath(fname)
                 .read_text(encoding="utf-8"),
                 metadata=dict(

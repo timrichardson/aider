@@ -46,7 +46,7 @@ can also
 from aider.args import get_sample_yaml
 from pathlib import Path
 text=get_sample_yaml()
-Path("aider/training_data/assets/sample.aider.conf.yml").write_text(text)
+Path("aider/training_data_aider/assets/sample.aider.conf.yml").write_text(text)
 cog.outl("```")
 cog.out(text)
 cog.outl("```")

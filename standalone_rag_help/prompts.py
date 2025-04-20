@@ -8,86 +8,7 @@ except ImportError:
     import importlib_resources
 import sys # Needed for print to stderr
 
-# <<< FUNCTION MOVED HERE >>>
-def fname_to_url(filepath, data_subdir="training_data"):
-    """
-    Converts a file path potentially containing the data_subdir component
-    into a documentation URL. Handles relative and absolute paths.
-    """
-    base_url = "https://aider.chat/"
-    index_suffix = "index.md"
-    md_suffix = ".md"
-    html_suffix = ".html"
-
-    try:
-        # Ensure filepath is a string and handle potential None or empty input
-        if not filepath:
-            return ""
-
-        # Normalize path separators to forward slashes for consistent parsing
-        filepath_normalized = filepath.replace("\\", "/")
-
-        # Convert to Path object for easier manipulation
-        path = Path(filepath_normalized)
-        parts = path.parts
-
-        # Find the index of the data_subdir component
-        try:
-            # Find the *last* occurrence in case data_subdir appears earlier in the path
-            # (e.g., /path/to/training_data/project/training_data/docs/...)
-            # Reverse parts, find first occurrence, convert index back
-            reversed_parts = list(parts)[::-1]
-            reversed_subdir_index = reversed_parts.index(data_subdir)
-            subdir_index = len(parts) - 1 - reversed_subdir_index
-        except ValueError:
-            # data_subdir not found in the path parts
-            # This path doesn't seem to be part of the website data structure
-            # print(f"Warning: '{data_subdir}' not found in path '{filepath}' for URL generation.", file=sys.stderr)
-            return ""
-
-        # Get the parts *after* data_subdir
-        relevant_parts = parts[subdir_index + 1 :]
-
-        if not relevant_parts:
-            # Path ended exactly with data_subdir (e.g., "path/to/training_data")
-            # This doesn't correspond to a specific doc page.
-            return ""
-
-        # Handle directories starting with '_' immediately after data_subdir
-        if relevant_parts[0].startswith("_"):
-            return ""
-
-        # Join the relevant parts to form the URL path component
-        url_path_part = "/".join(relevant_parts)
-
-        # Handle index.md and other .md files suffixes
-        if url_path_part.lower().endswith(index_suffix.lower()):
-            # Remove index.md suffix
-            url_path_part = url_path_part[:-len(index_suffix)]
-        elif url_path_part.lower().endswith(md_suffix.lower()):
-            # Replace .md suffix with .html
-            url_path_part = url_path_part[:-len(md_suffix)] + html_suffix
-
-        # Clean up any trailing slashes resulting from index suffix removal
-        url_path_part = url_path_part.strip("/")
-
-        # Construct the final URL
-        # If url_path_part is empty, it means the path was like '.../training_data/docs/index.md',
-        # and the part *before* index.md should form the URL path.
-        # Example: training_data/docs/index.md -> relevant_parts=('docs', 'index.md') -> url_path_part='docs'
-        # Example: training_data/docs/usage.md -> relevant_parts=('docs', 'usage.md') -> url_path_part='docs/usage.html'
-        # Example: training_data/index.md -> relevant_parts=('index.md',) -> url_path_part=''
-        # In the last case, return base_url? The tests imply this shouldn't map. Let's return base_url + url_path_part
-        final_url = f"{base_url}{url_path_part}"
-
-        return final_url
-
-    except Exception as e:
-        # Catch any unexpected errors during path manipulation
-        print(f"Error during URL generation for '{filepath}': {e}", file=sys.stderr)
-        return ""
-# <<< END OF MOVED FUNCTION >>>
-
+# <<< REMOVE fname_to_url FUNCTION DEFINITION ABOVE >>>
 
 class HelpPrompts:
     main_system = """You are an expert on the AI coding tool called Aider.
@@ -141,17 +62,10 @@ We may look at these in more detail after you answer my questions.
         for i, node in enumerate(nodes):
             content = node.get_content()
             metadata = node.metadata or {}
-            # Use 'file_path' which is standard in LlamaIndex metadata
-            # Corrected: LlamaIndex uses 'filename' or similar, let's stick to what rag_core uses
-            # Re-Correction: The original aider code used 'filename', let's use that for consistency
-            # with how the index might be built or how fname_to_url expects input.
-            # Final Decision: Check rag_core's Document creation. It uses 'filename'.
+            # Get the filename (or path stored during indexing under 'filename' key)
             filepath = metadata.get("filename", "Unknown source")
-            # We need the full path potentially for fname_to_url, metadata might only have filename.
-            # Let's assume fname_to_url can handle just the filename if the index metadata stores it that way.
-            # If the index stores a full path in metadata (e.g., under 'file_path'), use that.
-            # Sticking with 'filename' as per rag_core's Document creation metadata.
-            url = fname_to_url(filepath) # Use the existing function from rag_core
+            # Get the URL directly from metadata (populated from CSV during indexing under 'url' key)
+            url = metadata.get("url", "") # Default to empty string if not found
             response += f"<doc path=\"{filepath}\" url=\"{url}\">\n"
             response += content.strip() # Strip whitespace from content
             response += "\n</doc>\n\n"

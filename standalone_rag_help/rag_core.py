@@ -2,6 +2,7 @@
 
 import json
 import os
+import csv # Add csv import
 import shutil
 import os # Ensure os is imported
 import warnings
@@ -30,8 +31,9 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 # Ensure StorageContext and load_index_from_storage are imported
 from llama_index.core import StorageContext, load_index_from_storage
 
-# Import prompts to use the formatter and fname_to_url
-from .prompts import HelpPrompts, fname_to_url
+# Import prompts to use the formatter
+# fname_to_url is removed from prompts later
+from .prompts import HelpPrompts
 
 
 # Use a fixed version/name for the cache to avoid Aider version dependency
@@ -103,68 +105,48 @@ def install_dependencies_if_needed():
         return False
 
 
-def get_package_files(package_name="standalone_rag_help", data_subdir="training_data"):
-    """Yields Path objects for all markdown files within the package's data subdir."""
+def get_package_files(package_name="standalone_rag_help"):
+    """
+    Yields tuples of (training_dir_path, file_path) for all markdown files
+    within all 'training_data_*' directories in the package.
+    """
+    all_files_found = False
     try:
-        package_data_root = importlib_resources.files(package_name) / data_subdir
-        if not package_data_root.is_dir():
-            print(f"Error: Data directory '{data_subdir}' not found in package '{package_name}'.", file=sys.stderr)
-            return
+        package_root = importlib_resources.files(package_name)
+        for item in package_root.iterdir():
+            # Check if item is a directory and its name starts with "training_data_"
+            # Use .name attribute for string comparison
+            if item.is_dir() and item.name.startswith("training_data_"):
+                training_dir_path = item
+                print(f"Scanning training data directory: {training_dir_path.name}")
+                found_in_dir = False
+                for file_path in training_dir_path.rglob("*.md"):
+                    if file_path.is_file():
+                        yield (training_dir_path, file_path)
+                        found_in_dir = True
+                        all_files_found = True
+                if not found_in_dir:
+                     print(f"  No markdown files found in {training_dir_path.name}")
 
-        for path in package_data_root.rglob("*.md"):
-            if path.is_file():
-                # Yield the path relative to the package data root for consistency
-                # and to match the structure expected by fname_to_url if needed.
-                yield path
+        if not all_files_found:
+             print(f"Warning: No markdown files found in any 'training_data_*' directories within '{package_name}'.", file=sys.stderr)
+
     except Exception as e:
-        print(f"Error accessing package data files: {e}", file=sys.stderr)
+        print(f"Error accessing package data directories: {e}", file=sys.stderr)
 
 
-def fname_to_url(filepath, data_subdir="training_data"):
-    """Converts a file path within the packaged data to a documentation URL."""
-    # This assumes the URL structure matches aider.chat based on the relative path
-    # within the training_data directory.
-    base_url = "https://aider.chat/"
-    index = "index.md"
-    md = ".md"
+# <<< REMOVED fname_to_url FUNCTION DEFINITION >>>
 
-    # Convert to Path object for easier manipulation
-    path = Path(filepath)
+def get_index(force_rebuild=False):
+    """
+    Loads the index from cache or builds it if missing, corrupted, or force_rebuild is True.
 
-    # Find the data_subdir part in the path
-    try:
-        # Get parts relative to the assumed package data root
-        # This requires knowing where get_package_files starts yielding from.
-        # Assuming yield path gives the full path, we need to make it relative.
-        # Let's refine get_package_files to yield relative paths or handle it here.
+    Args:
+        force_rebuild (bool): If True, deletes any existing index and rebuilds it.
 
-        # Re-evaluate: Assume filepath is the absolute path from Path.rglob
-        # We need to find the part relative to the data_subdir root.
-        package_data_root = importlib_resources.files("standalone_rag_help") / data_subdir
-        relative_path = path.relative_to(package_data_root)
-        relevant_parts = relative_path.parts
-
-    except (ValueError, NameError, Exception) as e:
-         print(f"Warning: Could not determine relative path for URL generation: {e}", file=sys.stderr)
-         return "" # Can't determine relative path
-
-    # Handle _includes directory (or similar non-content dirs)
-    if relevant_parts and relevant_parts[0].lower().startswith("_"):
-        return ""
-
-    # Join the remaining parts
-    url_path = "/".join(relevant_parts)
-
-    # Handle index.md and other .md files
-    if url_path.lower().endswith(index.lower()):
-        url_path = url_path[: -len(index)]
-    elif url_path.lower().endswith(md.lower()):
-        url_path = url_path[: -len(md)] + ".html"
-
-    # Ensure the URL ends correctly
-    url_path = url_path.strip("/")
-
-def get_index():
+    Returns:
+        VectorStoreIndex: The loaded or built index, or raises an error.
+    """
     # Configure embedding model globally for LlamaIndex
     # Ensure TOKENIZERS_PARALLELISM is set appropriately
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -179,65 +161,169 @@ def get_index():
     cache_base_dir = Path.home() / ".standalone_rag_cache"
     dname = cache_base_dir / ("index." + STANDALONE_RAG_VERSION)
 
+    # --- Handle force_rebuild ---
+    if force_rebuild and dname.exists():
+        print(f"Force rebuild requested. Removing existing index at {dname}")
+        try:
+            shutil.rmtree(dname)
+        except OSError as e:
+            print(f"Error removing existing index for rebuild: {e}", file=sys.stderr)
+            # Decide whether to raise or just warn and continue build attempt
+            # Let's warn and continue for now.
+
     index = None
-    try:
-        if dname.exists():
+    # --- Attempt to load only if not forcing rebuild ---
+    if not force_rebuild and dname.exists():
+        try:
             storage_context = StorageContext.from_defaults(
                 persist_dir=str(dname), # Ensure path is string
             )
             index = load_index_from_storage(storage_context)
             print(f"Loaded existing index from {dname}")
-    except (OSError, json.JSONDecodeError, FileNotFoundError, TypeError, EOFError) as e: # Added more exceptions
-        print(f"Could not load index from {dname}, will rebuild. Error: {e}")
-        if dname.exists():
-            try:
-                shutil.rmtree(dname)
-                print(f"Removed corrupted index directory {dname}")
-            except OSError as rm_e:
-                print(f"Error removing corrupted index directory {dname}: {rm_e}", file=sys.stderr)
-    except Exception as e:
-        # Catch other potential LlamaIndex loading errors
-        print(f"An unexpected error occurred loading the index: {e}", file=sys.stderr)
-        if dname.exists():
-             try:
-                 shutil.rmtree(dname)
-                 print(f"Removed potentially problematic index directory {dname}")
-             except OSError as rm_e:
-                 print(f"Error removing index directory {dname}: {rm_e}", file=sys.stderr)
+        except (OSError, json.JSONDecodeError, FileNotFoundError, TypeError, EOFError) as e: # Added more exceptions
+            print(f"Could not load index from {dname}, will rebuild. Error: {e}")
+            if dname.exists():
+                try:
+                    shutil.rmtree(dname)
+                    print(f"Removed corrupted index directory {dname}")
+                except OSError as rm_e:
+                    print(f"Error removing corrupted index directory {dname}: {rm_e}", file=sys.stderr)
+        except Exception as e:
+            # Catch other potential LlamaIndex loading errors
+            print(f"An unexpected error occurred loading the index: {e}", file=sys.stderr)
+            if dname.exists():
+                 try:
+                     shutil.rmtree(dname)
+                     print(f"Removed potentially problematic index directory {dname}")
+                 except OSError as rm_e:
+                     print(f"Error removing index directory {dname}: {rm_e}", file=sys.stderr)
 
-
+    # --- Build index if needed (no index loaded or force_rebuild=True) ---
     if index is None:
+        # This block executes if:
+        # 1. force_rebuild was True (and existing index was removed)
+        # 2. force_rebuild was False, but dname didn't exist
+        # 3. force_rebuild was False, dname existed, but loading failed (and dname was removed)
         print("Building new RAG index...")
         parser = MarkdownNodeParser()
 
+        # --- Load URL Mappings from all CSVs ---
+        url_map = {} # Key: absolute file path string (posix), Value: url
+        all_training_dirs = set() # Keep track of dirs found
+        try:
+            package_root = importlib_resources.files("standalone_rag_help")
+            for item in package_root.iterdir():
+                 # Check if item is a directory and its name starts with "training_data_"
+                 if item.is_dir() and item.name.startswith("training_data_"):
+                     training_dir_path = item
+                     all_training_dirs.add(training_dir_path) # Keep track of dirs
+                     csv_path = training_dir_path / "metadata_map.csv"
+                     if csv_path.is_file():
+                         # Use relative_to for cleaner logging if possible
+                         try:
+                             log_csv_path = csv_path.relative_to(package_root)
+                         except ValueError:
+                             log_csv_path = csv_path # Fallback if not relative
+                         print(f"Loading URL map: {log_csv_path}")
+                         try:
+                             with csv_path.open('r', newline='', encoding='utf-8') as csvfile:
+                                 reader = csv.reader(csvfile)
+                                 header = next(reader) # Read header row
+                                 if header != ['relative_path', 'url']:
+                                      print(f"Warning: Unexpected header in {log_csv_path}: {header}", file=sys.stderr)
+                                      # Attempt to proceed assuming correct columns anyway, or skip file? Let's proceed.
+                                 for i, row in enumerate(reader):
+                                     if len(row) == 2:
+                                         relative_path, url = row
+                                         # Normalize relative path key from CSV
+                                         rel_path_key = relative_path.strip().replace("\\", "/")
+                                         # Construct absolute path for the map key:
+                                         # 1. Convert Traversable training_dir_path to string
+                                         # 2. Create Path object from string
+                                         # 3. Join with relative path key
+                                         # 4. Resolve the resulting Path object
+                                         abs_file_path_obj = Path(str(training_dir_path)) / rel_path_key
+                                         resolved_path = abs_file_path_obj.resolve()
+                                         # Store with POSIX path separator for consistency
+                                         url_map[resolved_path.as_posix()] = url.strip()
+                                     else:
+                                          print(f"Warning: Skipping malformed row {i+2} in {log_csv_path}: {row}", file=sys.stderr)
+                         except StopIteration:
+                             print(f"Warning: {log_csv_path} is empty or has only a header.", file=sys.stderr)
+                         except csv.Error as csv_e:
+                             print(f"Error reading CSV data from {log_csv_path}: {csv_e}", file=sys.stderr)
+                         except Exception as e:
+                             print(f"Error processing {log_csv_path}: {e}", file=sys.stderr)
+                     else:
+                         print(f"Info: No metadata_map.csv found in {training_dir_path.name}.")
+        except Exception as e:
+            print(f"Error discovering training directories or loading CSVs: {e}", file=sys.stderr)
+        # --- End URL Mapping Loading ---
+
         nodes = []
-        # Assume training_data data is packaged within standalone_rag_help/training_data
-        # The actual markdown files need to be copied there during packaging/setup.
-        # For development, you might place them there manually.
-        packaged_files = list(get_package_files())
-        if not packaged_files:
-             print("Error: No documentation files found in package data.", file=sys.stderr)
-             print("Please ensure the 'training_data' directory exists and contains markdown files.", file=sys.stderr)
+        # get_package_files now yields (training_dir_path, file_path) tuples
+        packaged_files_with_context = list(get_package_files())
+        if not packaged_files_with_context:
+             print("Error: No markdown documentation files found in any 'training_data_*' directories.", file=sys.stderr)
+             print("Please ensure at least one 'training_data_*' directory exists and contains markdown files.", file=sys.stderr)
              # Decide how to handle this - raise error or return None?
              # Raising an error might be better to indicate setup issue.
              raise FileNotFoundError("No documentation files found to build index.")
 
 
-        for fname_path in packaged_files:
-            # fname_path is now a Path object from get_package_files
-            if any(fname_path.match(pat) for pat in exclude_website_pats):
+        for training_dir_path_trav, fname_path_trav in packaged_files_with_context:
+            # --- Convert Traversable paths to standard Path objects ---
+            try:
+                # Convert using str() to get the path string representation
+                training_dir_path = Path(str(training_dir_path_trav))
+                fname_path = Path(str(fname_path_trav))
+            except Exception as path_conv_e:
+                 print(f"Error converting package path to standard Path: {path_conv_e}", file=sys.stderr)
+                 print(f"  Skipping file: {fname_path_trav}", file=sys.stderr)
+                 continue
+            # --- End Conversion ---
+
+            # Calculate path relative to its specific training dir for exclusion checks
+            relative_path_for_exclude = None
+            try:
+                # Use relative_to with standard Path objects
+                relative_path_for_exclude = fname_path.relative_to(training_dir_path)
+            except ValueError:
+                 # This can happen if fname_path is somehow not under training_dir_path
+                 # (Should be less likely now with explicit Path conversion)
+                 print(f"Warning: File {fname_path} seems outside its reported training dir {training_dir_path}. Skipping exclusion check.", file=sys.stderr)
+
+            # Perform exclusion check only if relative path could be determined
+            # Use standard Path.match method
+            if relative_path_for_exclude and any(relative_path_for_exclude.match(pat) for pat in exclude_website_pats):
+                # print(f"Excluding {relative_path_for_exclude} based on patterns.") # Optional debug print
                 continue
 
             try:
-                # Generate URL based on the path
-                doc_url = fname_to_url(str(fname_path))
+                # --- Get URL from mapping using absolute path ---
+                # Use standard Path.resolve() and .as_posix()
+                abs_path_key = fname_path.resolve().as_posix()
+                doc_url = url_map.get(abs_path_key, "") # Default to empty URL if not found
+                # --- End Get URL ---
+
+                # Determine the display filename (relative path if possible, else just name)
+                # Use standard Path.name attribute
+                display_filename = str(relative_path_for_exclude) if relative_path_for_exclude else fname_path.name
+                # Ensure display_filename uses forward slashes for consistency
+                display_filename = display_filename.replace("\\", "/")
 
                 doc = Document(
+                    # Use standard Path.read_text()
                     text=fname_path.read_text(encoding="utf-8"),
                     metadata=dict(
-                        filename=fname_path.name,
+                        # Store relative path for display/reference
+                        filename=display_filename,
+                        # Use standard Path.suffix
                         extension=fname_path.suffix,
-                        url=doc_url, # Use generated URL
+                        url=doc_url, # Use URL from map
+                        # Store the source directory name for context
+                        # Use standard Path.name
+                        source_dir=training_dir_path.name,
                     ),
                 )
                 nodes.extend(parser.get_nodes_from_documents([doc])) # Use extend
@@ -265,14 +351,14 @@ def get_index():
 
 # <<< ADD THESE FUNCTIONS >>>
 
-def get_index_dir(data_subdir="training_data"):
+def get_index_dir(data_subdir="training_data_aider"):
     """Helper to get the index directory path based on STANDALONE_RAG_VERSION."""
     # Use a dedicated cache directory for the standalone tool
     cache_base_dir = Path.home() / ".standalone_rag_cache"
     dname = cache_base_dir / ("index." + STANDALONE_RAG_VERSION)
     return str(dname) # Return as string path
 
-def ask_question(question, data_subdir="training_data"):
+def ask_question(question, data_subdir="training_data_aider"):
     """
     Performs a RAG query using the standalone help index.
 
@@ -325,6 +411,55 @@ def ask_question(question, data_subdir="training_data"):
     prompts = HelpPrompts() # Use the prompts from standalone_rag_help
     response = prompts.format_ask_response(question, nodes)
     return response
+
+def retrieve_raw_context(question, top_k=5):
+    """
+    Retrieves raw text context relevant to the question from the index.
+
+    Args:
+        question (str): The question to query the index with.
+        top_k (int): The number of top documents to retrieve.
+
+    Returns:
+        str: A string containing the concatenated text of the retrieved documents,
+             or an error message string starting with "Error:".
+    """
+    index_dir = get_index_dir() # Assumes default index location
+    if not os.path.exists(index_dir):
+        # Attempt to build if missing
+        print(f"Index not found at {index_dir}. Attempting to build...")
+        try:
+            if not install_dependencies_if_needed():
+                 return "Error: Dependencies missing and could not be installed. Cannot build index."
+            index = get_index()
+            if index is None: return "Error: Failed to build index."
+            print("Index built successfully.")
+        except Exception as e:
+            return f"Error: Failed to build index required for retrieval: {e}"
+
+    # Configure embedding model (needed for loading)
+    os.environ["TOKENIZERS_PARALLELISM"] = "true"
+    try:
+        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    except Exception as e:
+        return f"Error initializing embedding model for query: {e}"
+
+    try:
+        storage_context = StorageContext.from_defaults(persist_dir=index_dir)
+        index = load_index_from_storage(storage_context)
+        retriever = index.as_retriever(similarity_top_k=top_k)
+        nodes = retriever.retrieve(question)
+    except FileNotFoundError:
+        return f"Error: Index directory not found at {index_dir} even after build attempt."
+    except Exception as e:
+        return f"Error loading index or retrieving documents: {e}"
+
+    if not nodes:
+        return "No relevant context found."
+
+    # Concatenate the text content of the nodes
+    context_text = "\n\n---\n\n".join([node.get_content().strip() for node in nodes])
+    return context_text
 
 # <<< END OF ADDED FUNCTIONS >>>
 

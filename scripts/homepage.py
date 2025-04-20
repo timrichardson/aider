@@ -213,7 +213,7 @@ def get_latest_release_aider_percentage():
     blame_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
         "aider",
-        "training_data",
+        "training_data_aider",
         "_data",
         "blame.yml",
     )

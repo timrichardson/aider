@@ -32,4 +32,4 @@ where = ["."]
 include = ["standalone_rag_help*"]
 
 [tool.setuptools.package-data]
-"standalone_rag_help" = ["website_data/**/*", "website_data/**/.**/*"] # Include training_data data
+"standalone_rag_help" = ["website_data/**/*", "website_data/**/.**/*"] # Include training_data_aider data

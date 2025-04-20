@@ -1,62 +1,45 @@
 import unittest
 import os # Import os for path checking
 
-# Import fname_to_url from prompts
-from standalone_rag_help.prompts import fname_to_url
-# Import other functions from rag_core
+# Import functions from rag_core (fname_to_url removed)
 from standalone_rag_help.rag_core import ask_question, get_index_dir, get_index, install_dependencies_if_needed
 
 
 class TestHelp(unittest.TestCase):
-    def test_fname_to_url_unix(self):
-        # Test relative Unix-style paths
-        self.assertEqual(fname_to_url("training_data/docs/index.md"), "https://aider.chat/docs")
-        self.assertEqual(
-            fname_to_url("training_data/docs/usage.md"), "https://aider.chat/docs/usage.html"
-        )
-        self.assertEqual(fname_to_url("training_data/_includes/header.md"), "")
-
-        # Test absolute Unix-style paths
-        self.assertEqual(
-            fname_to_url("/home/user/project/training_data/docs/index.md"), "https://aider.chat/docs"
-        )
-        self.assertEqual(
-            fname_to_url("/home/user/project/training_data/docs/usage.md"),
-            "https://aider.chat/docs/usage.html",
-        )
-        self.assertEqual(fname_to_url("/home/user/project/training_data/_includes/header.md"), "")
-
-    def test_fname_to_url_edge_cases(self):
-        # Test paths that don't contain 'training_data'
-        self.assertEqual(fname_to_url("/home/user/project/docs/index.md"), "")
-        self.assertEqual(fname_to_url(r"C:\Users\user\project\docs\index.md"), "")
-
-        # Test empty path
-        self.assertEqual(fname_to_url(""), "")
-
-        # Test path with 'training_data' in the wrong place
-        self.assertEqual(fname_to_url("/home/user/website_project/docs/index.md"), "")
+    # <<< REMOVE test_fname_to_url_unix and test_fname_to_url_edge_cases >>>
 
     @classmethod
     def setUpClass(cls):
-        """Ensure dependencies are installed and index exists before running tests."""
+        """
+        Ensure dependencies are installed and index exists before running tests.
+        Checks REBUILD_RAG_INDEX environment variable to force index rebuild.
+        """
         print("\nSetting up TestHelp class...")
         if not install_dependencies_if_needed():
             raise unittest.SkipTest("Required dependencies are not installed. Skipping RAG tests.")
 
-        index_dir = get_index_dir()
-        if not os.path.exists(index_dir):
-            print(f"Test index not found at {index_dir}. Attempting to build...")
-            try:
-                get_index() # Attempt to build the index
-                if not os.path.exists(index_dir):
-                     raise FileNotFoundError("Index build attempt failed.")
-                print("Test index built successfully.")
-            except Exception as e:
-                print(f"Failed to build index for tests: {e}")
-                raise unittest.SkipTest(f"Failed to build index for tests: {e}")
-        else:
-            print(f"Using existing test index at {index_dir}")
+        # Check environment variable to force rebuild
+        force_rebuild = os.environ.get("REBUILD_RAG_INDEX", "false").lower() == "true"
+        if force_rebuild:
+            print("REBUILD_RAG_INDEX environment variable set. Forcing index rebuild.")
+
+        index_dir = get_index_dir() # Get expected index location
+
+        try:
+            # Call get_index, which handles loading, building, or forced rebuilding
+            get_index(force_rebuild=force_rebuild)
+
+            # Verify index directory exists after the call
+            if not os.path.exists(index_dir):
+                 raise FileNotFoundError(f"Index directory {index_dir} not found after get_index call.")
+            print(f"Index is ready at {index_dir}.")
+
+        except Exception as e:
+            print(f"Failed to ensure index is ready for tests: {e}")
+            # Optionally print traceback for more detail
+            # import traceback
+            # traceback.print_exc()
+            raise unittest.SkipTest(f"Failed to prepare index for tests: {e}")
 
 
     def test_ask_standalone(self):
@@ -64,7 +47,7 @@ class TestHelp(unittest.TestCase):
         Tests the standalone RAG query functionality.
         Relies on setUpClass ensuring the index exists.
         """
-        question = "What is aider?"
+        question = "What is zoho analytics?"
         result = ask_question(question)
 
         # Check if ask_question returned an error string

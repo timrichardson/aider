@@ -246,14 +246,14 @@ def start_openrouter_oauth_flow(io, analytics):
                     # Signal the main thread to shut down the server
                     shutdown_server.set()
                 else:
-                    # Redirect to aider training_data if 'code' is missing (e.g., user visited manually)
+                    # Redirect to aider training_data_aider if 'code' is missing (e.g., user visited manually)
                     self.send_response(302)  # Found (temporary redirect)
                     self.send_header("Location", urls.website)
                     self.end_headers()
                     # No need to set server_error, just redirect.
                     # Do NOT shut down the server here; wait for timeout or success.
             else:
-                # Redirect anything else (e.g., favicon.ico) to the main training_data as well
+                # Redirect anything else (e.g., favicon.ico) to the main training_data_aider as well
                 self.send_response(302)
                 self.send_header("Location", urls.website)
                 self.end_headers()

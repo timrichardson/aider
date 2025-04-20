@@ -1,3 +1,4 @@
+# Core RAG dependencies
 llama-index-embeddings-huggingface
 
 # Because sentence-transformers doesn't like >=2
@@ -10,3 +11,14 @@ torch==2.2.2
 # Later versions break test_help in GitHub Actions on Windows and Ubuntu
 llama-index-core==0.12.26
 
+# Added for download_analytics_docs.py script (and now included in core deps)
+requests
+beautifulsoup4
+trafilatura
+markdownify
+
+# Test dependency (optional, but requested)
+pytest
+
+# LLM interaction library
+litellm

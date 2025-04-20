@@ -13,16 +13,16 @@ import yaml
 from tqdm import tqdm
 
 website_files = [
-    "aider/training_data/index.html",
-    "aider/training_data/share/index.md",
-    "aider/training_data/_includes/head_custom.html",
-    "aider/training_data/_includes/home.css",
-    "aider/training_data/docs/leaderboards/index.md",
+    "aider/training_data_aider/index.html",
+    "aider/training_data_aider/share/index.md",
+    "aider/training_data_aider/_includes/head_custom.html",
+    "aider/training_data_aider/_includes/home.css",
+    "aider/training_data_aider/docs/leaderboards/index.md",
 ]
 
 exclude_files = [
-    "aider/training_data/install.ps1",
-    "aider/training_data/install.sh",
+    "aider/training_data_aider/install.ps1",
+    "aider/training_data_aider/install.sh",
 ]
 
 
