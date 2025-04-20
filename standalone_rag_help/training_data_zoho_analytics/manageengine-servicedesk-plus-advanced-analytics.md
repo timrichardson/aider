@@ -1,0 +1,3 @@
+ManageEngine ServiceDesk Plus Advanced Analytics
+The Zoho Analytics Advanced Analytics for ManageEngine ServiceDesk Plus enables you to easily analyze your ServiceDesk Plus data. With this connector, you can create insightful reports & dashboards over your SDP data.
+ITIL/ITSM managers can 'slice and dice' their service desk data the way they want, analyze key service metrics and take informed business decisions to optimize their business operation.

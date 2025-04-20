@@ -1,0 +1,3 @@
+Portal
+The Portal allows you to organize reports & dashboards you have created into pages and publish them as a microsite for easy access to your users. Website now being a standard & familar way of consuming any type of information, creating an portal by publishing your analytical content created in Zoho Analytics, to your users is what Portal feature enables you to do.
+This microsite portal allows you to publish reports & dashboards from across your Zoho Analytics workspaces, combing with rich formatted text & visuals. You can also use a variety of website templates to create an interactive and rich website portal that will enable any type of users to access, interact and consume key business insights.

@@ -1,0 +1,2 @@
+User Management
+Zoho Analytics allows you to manage your account and collaborate with your colleagues and users with a segregated space called Organization. You can control the access over your Organization and Workspaces by managing the user roles. This section briefs you on roles and user management.

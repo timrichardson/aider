@@ -1,0 +1,4 @@
+Data StoryTelling
+Data Storytelling is about delivering consumable insights through familiar everyday business workflows, thereby increasing insight adoption.
+With Zoho Analytics Data Storytelling capabilities you can craft stories with immersive presentations, or setup purpose-built analytical portals for sharing insights. Zia Insights is another storytelling capability that provides automated insights through textual narration of key insights from reports and dashboards. This significantly reduces the time and effort required to explore data and glean insights.
+In this section, we will learn about :

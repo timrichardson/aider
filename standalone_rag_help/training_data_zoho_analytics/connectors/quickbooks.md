@@ -1,0 +1,2 @@
+QuickBooks Advanced Analytics
+Zoho Analytics Advanced Analytics for QuickBooks empowers you with financial analytical capabilities over your QuickBooks Online data. With this connector, you can create insightful reports & dashboards over your QuickBooks data for in-depth financial analysis.

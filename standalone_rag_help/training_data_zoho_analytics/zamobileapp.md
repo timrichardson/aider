@@ -1,0 +1,3 @@
+Zoho Analytics Mobile App
+Zoho Analytics has powerful mobile apps optimized for both IOS and Android platforms. With the Zoho Analytics app, you can access the reports and dashboards that you create in Zoho Analytics service, on the go. The app enables you to interact with your data and reports, helps you keep track of your key performance metrics and take informed business decisions, all, while on-the-move.
+To know more read:

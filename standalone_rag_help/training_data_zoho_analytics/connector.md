@@ -1,0 +1,4 @@
+Business Apps Analytics
+Zoho Analytics provides Advanced Analytics Connectors for a wide range of business applications. With this, you can analyze your data using the dynamic and cool visualization options available in Zoho Analytics.
+Each integration comes with a comprehensive set of hand-picked domain-specific default reports and dashboards that enables the users to analyze their key performance metrics immediately. Apart from this, you can also create dynamic reports and dashboards.
+Zoho Analytics has trained Ask Zia with domain-specific skills for these Business Apps Analytics to answer your questions appropriately.

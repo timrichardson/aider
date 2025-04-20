@@ -1,0 +1,3 @@
+Summary View
+Summary View, as the name indicates, is a report type that enables you to view your summarized data in tabular formats. This report type is extremely useful when you need to analyze huge amount of data with logical grouping and appropriate summarizations in a visually intutive manner. You can also filter, sort, apply conditional formatting and do much more.
+In this chapter, we will discuss the below topics.

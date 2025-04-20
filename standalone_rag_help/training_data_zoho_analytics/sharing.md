@@ -1,0 +1,13 @@
+Sharing Reports and Dashboards
+Zoho Analytics offers a very easy and effective way to collaborate reports with your colleagues and friends. Any user with whom you share your data, reports and dashboards, can access them online from any where any time. You can also create groups for easy sharing and collaboration.
+Advantages of Zoho Analytics Online Sharing and Collaboration Features
+- Easy Sharing: You can share any data, reports or dashboards to any users or group.
+- Access Online: Users can access the shared views online from Zoho Analytics any time and any where.
+- Controlled Data Access: Zoho Analytics provides a secured sharing mechanism, which gives you complete control over the data made accessible to users. You can setup filters to share only required data rows and columns.
+- Fine grained permission control: You can set fine-grained permissions over the shared views. Shared users can perform only the permitted operations such as read, write, export, share, etc., over the shared
+- Single Version and the latest always: Any data or report or dashboard shared when accessed by shared users, will always have the latest live version.
+- Enable True Collaborative Reporting and Analytics: Typical business analytics software is very restrictive as far as collaboration is concerned. Zoho Analytics' fine-grained access control system lets you share a table, dashboard, chart or any report with necessary permissions. It allows group of people do collaborative analysis i.e., work on the same data, analyze it and generate reports to arrive at a collective decision quickly.
+- No Multiple Versions of Truth: As there is no need to send your reports in file format, this avoids the possibility of users having different versions of data and reports with their own changes. In Zoho Analytics any data, report or dashboard shared can be accessed by users online. The same (and latest) version of reports and data is visible to everyone. Naturally this takes care of conflicting versions/modifications.
+- Highly Secure: While sharing, apart from the fine grained permissions, you may also specify whether it requires a user to login into his/her Zoho Analytics account for access (private sharing) or if it can be accessed without login into Zoho Analytics (public sharing).
+Quick Overview of Sharing Options in Zoho Analytics
+In this section we will discuss the various Sharing and Collaboration features offered by Zoho Analytics:

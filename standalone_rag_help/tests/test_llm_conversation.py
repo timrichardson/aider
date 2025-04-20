@@ -55,7 +55,7 @@ class TestLLMConversation(unittest.TestCase):
         mock_print.assert_any_call("\nAssistant: Hi! How can I help?")
 
     @patch('standalone_rag_help.llm_conversation.install_dependencies_if_needed', return_value=True)
-    @patch('standalone_rag_help.rag_core.retrieve_raw_context')
+    @patch('standalone_rag_help.llm_conversation.retrieve_raw_context') # Target where it's used
     @patch('standalone_rag_help.llm_conversation.get_llm_response')
     @patch('builtins.input', side_effect=['/help What is RAG?', 'quit'])
     def test_help_command_success(self, mock_input, mock_get_llm, mock_retrieve_context, mock_install_deps):
@@ -85,7 +85,7 @@ class TestLLMConversation(unittest.TestCase):
         mock_print.assert_any_call("\nAssistant: Based on the context, RAG is Retrieval-Augmented Generation.")
 
     @patch('standalone_rag_help.llm_conversation.install_dependencies_if_needed', return_value=True)
-    @patch('standalone_rag_help.rag_core.retrieve_raw_context')
+    @patch('standalone_rag_help.llm_conversation.retrieve_raw_context') # Target where it's used
     @patch('standalone_rag_help.llm_conversation.get_llm_response')
     @patch('builtins.input', side_effect=['/help What is RAG?', 'quit'])
     def test_help_command_rag_error(self, mock_input, mock_get_llm, mock_retrieve_context, mock_install_deps):

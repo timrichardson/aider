@@ -1,0 +1,3 @@
+Using the Reports tab inside Zoho Creator
+Zoho Creator enables you to create reports using the Reports tab that is available right within the Zoho Creator applications. These reporting features are powered by Zoho Analytics. Reports (only Pivot charts and Pivot tables) can be created over data collected for each form in the application, by accessing the Reports tab available in the edit mode of the application.
+You can read more about how to use the Reports tab within Zoho Creator from this Zoho Creator help document.

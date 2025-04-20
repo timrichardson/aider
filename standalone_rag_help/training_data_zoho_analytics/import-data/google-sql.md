@@ -1,0 +1,3 @@
+Import data from Google Cloud SQL
+If you have stored your data stored in MySQL or PostgreSQL database hosted in Google Cloud SQL, then you can easily import the data into Zoho Analytics. You can easily setup data import from the Google Cloud databases using the simple setup wizard. You can also setup schedules to periodically fetch the latest data from these databases into Zoho Analytics.
+In this chapter we are going to learn about importing data from the following Google Cloud databases:

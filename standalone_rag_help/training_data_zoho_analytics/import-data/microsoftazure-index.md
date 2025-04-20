@@ -1,0 +1,3 @@
+Import data from Microsoft Azure
+If you have stored your data stored in PostgreSQL, Maria DB, SQL Database, or SQL Data Warehouse database hosted in Microsoft Azure, then you can easily import the data into Zoho Analytics. You can easily setup data import from the Microsoft Azure cloud databases using the simple setup wizard. You can also setup schedules to periodically fetch the latest data from these databases into Zoho Analytics.
+In this chapter we are going to learn about importing data from the following Microsoft Azure databases:

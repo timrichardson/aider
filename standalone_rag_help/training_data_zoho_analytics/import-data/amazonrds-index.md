@@ -1,0 +1,3 @@
+Import data from Amazon RDS
+If you have stored your data stored in MySQL, SQL Server, Oracle, Amazon Aurora, PostgreSQL or Maria DB database hosted in Amazon RDS, then you can easily import the data into Zoho Analytics. You can easily setup data import from the Amazon RDS cloud databases using the simple setup wizard. You can also setup schedules to periodically fetch the latest data from these databases into Zoho Analytics.
+In this chapter we are going to learn about importing data from the following Amazon RDS databases:
