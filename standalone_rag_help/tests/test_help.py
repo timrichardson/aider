@@ -63,7 +63,7 @@ class TestHelp(unittest.TestCase):
         self.assertIn("<doc", result)
         self.assertIn("</doc>", result)
         # Check for keywords (adjust if needed for standalone context)
-        self.assertIn("aider", result.lower())
+        self.assertIn("zoho", result.lower())
         # self.assertIn("ai", result.lower()) # Less critical for standalone test
         # self.assertIn("tool", result.lower()) # Check for 'tool' instead of 'chat'
 

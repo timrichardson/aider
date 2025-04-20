@@ -217,15 +217,27 @@ def get_index(force_rebuild=False):
                  if item.is_dir() and item.name.startswith("training_data_"):
                      training_dir_path = item
                      all_training_dirs.add(training_dir_path) # Keep track of dirs
-                     csv_path = training_dir_path / "metadata_map.csv"
+                     csv_path_trav = training_dir_path / "metadata_map.csv" # This is a Traversable
+
+                     # Convert Traversable to Path before filesystem checks
+                     try:
+                         csv_path = Path(str(csv_path_trav))
+                     except Exception as path_conv_e:
+                         print(f"Error converting CSV path {csv_path_trav} to standard Path: {path_conv_e}", file=sys.stderr)
+                         continue # Skip this directory's CSV
+
                      if csv_path.is_file():
                          # Use relative_to for cleaner logging if possible
                          try:
-                             log_csv_path = csv_path.relative_to(package_root)
+                             # Use the Path object for relative_to
+                             log_csv_path = csv_path.relative_to(Path(str(package_root)))
                          except ValueError:
                              log_csv_path = csv_path # Fallback if not relative
+                         except Exception as e:
+                             pass # Ignore errors getting relative path for logging
                          print(f"Loading URL map: {log_csv_path}")
                          try:
+                             # Use the Path object for open()
                              with csv_path.open('r', newline='', encoding='utf-8') as csvfile:
                                  reader = csv.reader(csvfile)
                                  header = next(reader) # Read header row
@@ -238,10 +250,7 @@ def get_index(force_rebuild=False):
                                          # Normalize relative path key from CSV
                                          rel_path_key = relative_path.strip().replace("\\", "/")
                                          # Construct absolute path for the map key:
-                                         # 1. Convert Traversable training_dir_path to string
-                                         # 2. Create Path object from string
-                                         # 3. Join with relative path key
-                                         # 4. Resolve the resulting Path object
+                                         # Use the already converted Path object 'training_dir_path'
                                          abs_file_path_obj = Path(str(training_dir_path)) / rel_path_key
                                          resolved_path = abs_file_path_obj.resolve()
                                          # Store with POSIX path separator for consistency
