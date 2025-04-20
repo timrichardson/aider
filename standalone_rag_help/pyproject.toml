@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "standalone-rag-help"
+version = "0.1.0"
+description = "Standalone RAG system for Aider documentation"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "llama-index-core",
+    "llama-index-embeddings-huggingface",
+    "torch", # Required by sentence-transformers/huggingface
+    "transformers", # Required by sentence-transformers/huggingface
+    "sentence-transformers", # For BAAI embedding model
+    "importlib-resources; python_version<'3.10'", # For finding package data
+    "click", # For the CLI
+    "markdown", # Often useful for Markdown parsing, though llama-index might bundle it
+]
+
+[project.scripts]
+rag-help = "standalone_rag_help.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["standalone_rag_help*"]
+
+[tool.setuptools.package-data]
+"standalone_rag_help" = ["website_data/**/*", "website_data/**/.**/*"] # Include training_data data
